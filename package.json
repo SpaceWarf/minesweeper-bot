@@ -1,0 +1,10 @@
+{
+  "name": "minesweeper-bot",
+  "version": "1.0.0",
+  "description": "Almost as real as The Hurt Locker",
+  "main": "bot.js",
+  "author": "SpaceWarf",
+  "dependencies": {
+    "discord.js": "^11.4.2"
+  }
+}
