@@ -2,14 +2,6 @@ const Discord = require('discord.js');
 const auth = require('./auth.json');
 const client = new Discord.Client();
 
-const defaultPuzzle = [
-    [1, 1, 1, 'X', 1],
-    ['X', 2, 2, 3, 2],
-    [1, 3, 'X', 3, 'X'],
-    [0, 2, 'X', 3, 1],
-    [0, 1, 1, 1, 0]
-];
-
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag);
 });
@@ -23,33 +15,127 @@ client.on('message', (receivedMessage) => {
 const processCommand = message => {
     const msgArray = message.content.substr(1).split(" ");
     const command = msgArray[0];
-    const arguments = msgArray.slice(1);
+    const args = msgArray.slice(1);
 
     switch (command) {
         case 'help':
             sendHelp(message.channel);
             break;
         case 'minesweeper':
-            sendPuzzle(message.channel, arguments);
+            if (inputIsValid(args)) {
+                sendPuzzle(message.channel, args);
+            } else {
+                sendError(message.channel);
+            }
             break;
         default:
     }
 };
 
-const sendHelp = channel => {
-    channel.send('Need help? Just type !minesweeper to generate a puzzle.');
+const inputIsValid = args => {
+    return args[0] * args[1] <= 197 &&
+        args[2] <= args[0] * args[1];
 };
 
-const sendPuzzle = (channel, arguments) => {
+const sendError = channel => {
+    channel.send('Error: invalid input. :rage:');
+};
+
+const sendHelp = channel => {
+    const p1 = 'Need help? Just use !minesweeper to generate a puzzle.';
+    const p2 = 'The command takes grid dimensions and mine quantity, in this order.';
+    const p3 = 'Try !minesweeper 5 7 10 to generate a 5x7 grid with 10 mines on it.';
+    const p4 = 'Due to Discord limitations, your grid cannot contain more than 197 cells.';
+    channel.send(`${p1}\n${p2}\n${p3}\n${p4}`);
+};
+
+const sendPuzzle = (channel, args) => {
+    const emptyGrid = generateEmptyGrid(args[0], args[1]);
+    const minedGrid = addMines(emptyGrid, args[2]);
+    const filledGrid = fillNumbers(minedGrid);
+    channel.send('Here is your puzzle! Goodluck :wink:\n' + formatPuzzle(filledGrid));
+};
+
+const generateEmptyGrid = (width, height) => {
+    const emptyRow = [];
+    const emptyGrid = [];
+    for (let i = 0; i < width; i++) {
+        emptyRow.push(0);
+    }
+    for (let i = 0; i < height; i++) {
+        // The spread operator is used to break references between the empty row objects
+        emptyGrid.push([...emptyRow]);
+    }
+    return emptyGrid;
+};
+
+const addMines = (emptyGrid, minesQty) => {
+    const minedGrid = emptyGrid;
+    for (let i = 0; i < minesQty; i++) {
+        let mineRow;
+        let mineCol;
+        do {
+            mineRow = generateRandomNumber(emptyGrid.length);
+            mineCol = generateRandomNumber(emptyGrid[0].length);
+        } while (typeof minedGrid[mineRow][mineCol] === 'string');
+        minedGrid[mineRow][mineCol] = 'X';
+    }
+    return minedGrid;
+};
+
+const fillNumbers = minedGrid => {
+    const filledGrid = minedGrid;
+    for (let i = 0; i < filledGrid.length; i++) {
+        for (let j = 0; j < filledGrid[0].length; j++) {
+            if (typeof filledGrid[i][j] === 'string') {
+                increaseAdjacentNumbers(i, j, filledGrid);
+            }
+        }
+    }
+    return filledGrid;
+};
+
+const increaseAdjacentNumbers = (row, col, filledGrid) => {
+    if (filledGrid[row + 1]) {
+        filledGrid[row + 1][col] += 1;
+        if (typeof filledGrid[row + 1][col + 1] === 'number') {
+            filledGrid[row + 1][col + 1] += 1;
+        }
+        if (typeof filledGrid[row + 1][col - 1] === 'number') {
+            filledGrid[row + 1][col - 1] += 1;
+        }
+    }
+    if (filledGrid[row - 1]) {
+        filledGrid[row - 1][col] += 1;
+        if (typeof filledGrid[row - 1][col + 1] === 'number') {
+            filledGrid[row - 1][col + 1] += 1;
+        }
+        if (typeof filledGrid[row - 1][col - 1] === 'number') {
+            filledGrid[row - 1][col - 1] += 1;
+        }
+    }
+    if (typeof filledGrid[row][col + 1] === 'number') {
+        filledGrid[row][col + 1] += 1;
+    }
+    if (typeof filledGrid[row][col - 1] === 'number') {
+        filledGrid[row][col - 1] += 1;
+    }
+};
+
+const generateRandomNumber = max => {
+    return Math.floor(Math.random() * Math.floor(max));
+};
+
+const formatPuzzle = puzzleGrid => {
     let formattedPuzzle = "";
-    defaultPuzzle.forEach(row => {
+    puzzleGrid.forEach(row => {
         row.forEach(cell => {
             formattedPuzzle += `||${getEmoji(cell)}||`
         });
         formattedPuzzle += '\n';
     });
-    channel.send('Here is your puzzle! Goodluck :wink:\n' + formattedPuzzle);
-}
+    return formattedPuzzle
+};
 
 const getEmoji = character => {
     switch (character) {
@@ -61,11 +147,19 @@ const getEmoji = character => {
             return ":two:";
         case 3:
             return ":three:";
-        case "X":
-            return ":regional_indicator_x:";
+        case 4:
+            return ":four:";
+        case 5:
+            return ":five:";
+        case 6:
+            return ":six:";
+        case 7:
+            return ":seven:";
+        case 8:
+            return ":eight:";
         default:
-            return "";
+            return ":bomb:";
     }
-}
+};
 
 client.login(auth.token);
