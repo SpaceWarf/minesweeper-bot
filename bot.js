@@ -33,8 +33,14 @@ const processCommand = message => {
 };
 
 const inputIsValid = args => {
-    return args[0] * args[1] <= 197 &&
-        args[2] <= args[0] * args[1];
+    const width = parseInt(args[0]);
+    const height = parseInt(args[1]);
+    const minesQty = parseInt(args[2]);
+    return width > 0 &&
+        height > 0 &&
+        minesQty >= 0 &&
+        width * height <= 197 &&
+        minesQty <= width * height
 };
 
 const sendError = channel => {
