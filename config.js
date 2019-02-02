@@ -14,6 +14,8 @@ const difficulty = {
         height: 12,
         mineQty: 40
     }
-}
+};
 
-export default difficulty;
+module.exports = {
+    difficulty
+};
