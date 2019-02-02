@@ -55,7 +55,7 @@ const sendHelp = channel => {
     const p3 = 'Try !minesweeper 5 7 10 to generate a 5x7 grid with 10 mines on it.';
     const p4 = 'Alternatively, you can choose a difficulty like so !minesweeper (easy | intermediate | hard).';
     const p5 = 'Due to Discord limitations, your grid cannot contain more than 197 cells.';
-    channel.send(`${p1}\n${p2}\n${p3}\n${p4}\m${p5}`);
+    channel.send(`${p1}\n${p2}\n${p3}\n${p4}\n${p5}`);
 };
 
 const sendPuzzle = (channel, args) => {
@@ -66,8 +66,8 @@ const sendPuzzle = (channel, args) => {
     if (args.length === 1) {
         switch (args[0]) {
             case 'easy':
-                gridWidth = 6;
-                gridHeight = 8;
+                gridWidth = 8;
+                gridHeight = 6;
                 mineQty = 5;
                 break;
             case 'intermediate':
@@ -82,6 +82,7 @@ const sendPuzzle = (channel, args) => {
                 break;
             default:
                 sendError(channel);
+                return;
         }
     } else {
         gridWidth = args[0];
