@@ -1,3 +1,5 @@
+import difficulty from './config';
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
@@ -59,39 +61,27 @@ const sendHelp = channel => {
 };
 
 const sendPuzzle = (channel, args) => {
-    let gridWidth;
-    let gridHeight;
-    let mineQty;
+    let grid = {};
 
     if (args.length === 1) {
         switch (args[0]) {
             case 'easy':
-                gridWidth = 8;
-                gridHeight = 6;
-                mineQty = 5;
-                break;
             case 'intermediate':
-                gridWidth = 10;
-                gridHeight = 10;
-                mineQty = 15;
-                break;
             case 'hard':
-                gridWidth = 16;
-                gridHeight = 12;
-                mineQty = 40;
+                grid = difficulty[args[0]];
                 break;
             default:
                 sendError(channel);
                 return;
         }
     } else {
-        gridWidth = args[0];
-        gridHeight = args[1];
-        mineQty = args[2];
+        grid.width = args[0];
+        grid.height = args[1];
+        grid.mineQty = args[2];
     }
 
-    const emptyGrid = generateEmptyGrid(gridWidth, gridHeight);
-    const minedGrid = addMines(emptyGrid, mineQty);
+    const emptyGrid = generateEmptyGrid(grid.width, grid.height);
+    const minedGrid = addMines(emptyGrid, grid.mineQty);
     const filledGrid = fillNumbers(minedGrid);
     channel.send('Here is your puzzle! Goodluck :wink:\n' + formatPuzzle(filledGrid));
 };
