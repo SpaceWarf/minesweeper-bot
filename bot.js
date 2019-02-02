@@ -1,4 +1,4 @@
-import difficulty from './config';
+const difficulty = require('./config');
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
