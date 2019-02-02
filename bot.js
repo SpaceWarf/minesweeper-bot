@@ -16,6 +16,8 @@ const processCommand = message => {
     const command = msgArray[0];
     const args = msgArray.slice(1);
 
+    console.log(`Received !${command} from ${message.user} with args ${args}`);
+
     switch (command) {
         case 'help':
             sendHelp(message.channel);
@@ -35,11 +37,12 @@ const inputIsValid = args => {
     const width = parseInt(args[0]);
     const height = parseInt(args[1]);
     const minesQty = parseInt(args[2]);
-    return width > 0 &&
-        height > 0 &&
-        minesQty >= 0 &&
-        width * height <= 197 &&
-        minesQty <= width * height
+    return (args.length === 1 && typeof args[0] === 'string') ||
+        (width > 0 &&
+            height > 0 &&
+            minesQty >= 0 &&
+            width * height <= 197 &&
+            minesQty <= width * height)
 };
 
 const sendError = channel => {
@@ -50,13 +53,44 @@ const sendHelp = channel => {
     const p1 = 'Need help? Just use !minesweeper to generate a puzzle.';
     const p2 = 'The command takes grid dimensions and mine quantity, in this order.';
     const p3 = 'Try !minesweeper 5 7 10 to generate a 5x7 grid with 10 mines on it.';
-    const p4 = 'Due to Discord limitations, your grid cannot contain more than 197 cells.';
-    channel.send(`${p1}\n${p2}\n${p3}\n${p4}`);
+    const p4 = 'Alternatively, you can choose a difficulty like so !minesweeper (easy | intermediate | hard).';
+    const p5 = 'Due to Discord limitations, your grid cannot contain more than 197 cells.';
+    channel.send(`${p1}\n${p2}\n${p3}\n${p4}\m${p5}`);
 };
 
 const sendPuzzle = (channel, args) => {
-    const emptyGrid = generateEmptyGrid(args[0], args[1]);
-    const minedGrid = addMines(emptyGrid, args[2]);
+    let gridWidth;
+    let gridHeight;
+    let mineQty;
+
+    if (args.length === 1) {
+        switch (args[0]) {
+            case 'easy':
+                gridWidth = 6;
+                gridHeight = 8;
+                mineQty = 5;
+                break;
+            case 'intermediate':
+                gridWidth = 10;
+                gridHeight = 10;
+                mineQty = 15;
+                break;
+            case 'hard':
+                gridWidth = 16;
+                gridHeight = 12;
+                mineQty = 40;
+                break;
+            default:
+                sendError(channel);
+        }
+    } else {
+        gridWidth = args[0];
+        gridHeight = args[1];
+        mineQty = args[2];
+    }
+
+    const emptyGrid = generateEmptyGrid(gridWidth, gridHeight);
+    const minedGrid = addMines(emptyGrid, mineQty);
     const filledGrid = fillNumbers(minedGrid);
     channel.send('Here is your puzzle! Goodluck :wink:\n' + formatPuzzle(filledGrid));
 };
