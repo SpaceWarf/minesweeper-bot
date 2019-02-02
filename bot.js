@@ -39,12 +39,12 @@ const inputIsValid = args => {
     const width = parseInt(args[0]);
     const height = parseInt(args[1]);
     const minesQty = parseInt(args[2]);
-    return (args.length === 1 && typeof args[0] === 'string') ||
-        (width > 0 &&
-            height > 0 &&
-            minesQty >= 0 &&
-            width * height <= 197 &&
-            minesQty <= width * height)
+
+    const isDifficultyString = args.length === 1 && typeof args[0] === 'string';
+    const valuesArePositive = width > 0 && height > 0 && minesQty >= 0
+    const dimensionsAreValid = width * height <= 197 && minesQty <= width * height
+
+    return isDifficultyString || valuesArePositive && dimensionsAreValid;
 };
 
 const sendError = channel => {
