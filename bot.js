@@ -16,7 +16,7 @@ const processCommand = message => {
     const command = msgArray[0];
     const args = msgArray.slice(1);
 
-    console.log(`Received !${command} from ${message.user} with args ${args}`);
+    console.log(`Received !${command} from ${message.author} ${args.length === 0 ? '' : `with args ${args}`}`);
 
     switch (command) {
         case 'help':
